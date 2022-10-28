@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:task_project/base/base.dart';
 import 'package:task_project/bloc/List/list_screen_bloc.dart';
 import 'package:task_project/router.dart';
@@ -80,7 +81,7 @@ class _ListScreenState extends State<ListScreen>
                                 Navigator.pop(context);
                               },
                               logoutFunction: () {
-                                null;
+                                signOut();
                               },
                               labelText: 'Last Login'),
                           SizedBox(
@@ -266,8 +267,10 @@ class _ListScreenState extends State<ListScreen>
         });
   }
 
-  signOut() {
+  signOut() async {
     _auth.signOut().then((value) async =>
         await Navigator.pushNamed(context, AppRoutes.landingScreen));
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    await preferences.clear();
   }
 }

@@ -6,11 +6,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:task_project/base/base.dart';
 import 'package:task_project/bloc/plugin_screen/plugin_bloc.dart';
 import 'package:task_project/model/albums_list.dart';
 import 'package:task_project/router.dart';
 import 'package:task_project/settings/color_resource.dart';
+import 'package:task_project/settings/preferences.dart';
 import 'package:task_project/widgets/widget_utils.dart';
 import 'dart:math';
 
@@ -210,9 +212,11 @@ class _PluginScreenState extends State<PluginScreen> {
     );
   }
 
-  signOut() {
+  signOut() async {
     _auth.signOut().then((value) async =>
         await Navigator.pushNamed(context, AppRoutes.landingScreen));
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    await preferences.clear();
   }
 
   Future<Uint8List> toQrImageData(String text) async {

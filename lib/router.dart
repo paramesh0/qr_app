@@ -8,6 +8,7 @@ import 'package:task_project/bloc/login/login_bloc.dart';
 import 'package:task_project/bloc/login/login_screen.dart';
 import 'package:task_project/bloc/plugin_screen/plugin_bloc.dart';
 import 'package:task_project/bloc/plugin_screen/plugin_view_screen.dart';
+import 'package:task_project/settings/preferences.dart';
 import 'bloc/plugin_screen/plugin_event.dart';
 
 class AppRoutes {
@@ -35,7 +36,8 @@ Route<dynamic> _buildLandingScreen() {
 
 Route<dynamic> _buildPluginScreen(dynamic arguments) {
   return MaterialPageRoute(
-      builder: (BuildContext context) => PageBuilder.buildPluginScreen(arguments: arguments));
+      builder: (BuildContext context) =>
+          PageBuilder.buildPluginScreen(arguments: arguments));
 }
 
 Route<dynamic> _buildListScreen() {
@@ -53,7 +55,8 @@ class PageBuilder {
 
   static Widget buildPluginScreen({dynamic arguments}) {
     return BlocProvider(
-      create: (BuildContext context) => PluginBloc()..add(PluginIntialEvent(arguments: arguments)),
+      create: (BuildContext context) =>
+          PluginBloc()..add(PluginIntialEvent(arguments: arguments)),
       child: const PluginScreen(),
     );
   }
@@ -74,7 +77,14 @@ Widget addAuthBloc(BuildContext context, Widget widget) {
         while (Navigator.canPop(context)) {
           Navigator.pop(context);
         }
-        await Navigator.pushReplacementNamed(context, AppRoutes.landingScreen);
+        String? isLogin;
+        await Preferences.getLoginStatus().then((value) => isLogin = value);
+        if (isLogin == 'LoginSuccess') {
+          await Navigator.pushReplacementNamed(
+              context, AppRoutes.pluginScreen);
+        } else {
+          await Navigator.pushReplacementNamed(context, AppRoutes.landingScreen);
+        }
       }
 
       if (state is AuthenticationAuthenticated) {
