@@ -21,7 +21,7 @@ Route<dynamic>? getRoute(RouteSettings settings) {
     case AppRoutes.landingScreen:
       return _buildLandingScreen();
     case AppRoutes.pluginScreen:
-      return _buildPluginScreen();
+      return _buildPluginScreen(settings.arguments);
     case AppRoutes.listScreen:
       return _buildListScreen();
   }
@@ -33,9 +33,9 @@ Route<dynamic> _buildLandingScreen() {
       builder: (BuildContext context) => PageBuilder.buildLandingScreen());
 }
 
-Route<dynamic> _buildPluginScreen() {
+Route<dynamic> _buildPluginScreen(dynamic arguments) {
   return MaterialPageRoute(
-      builder: (BuildContext context) => PageBuilder.buildPluginScreen());
+      builder: (BuildContext context) => PageBuilder.buildPluginScreen(arguments: arguments));
 }
 
 Route<dynamic> _buildListScreen() {
@@ -51,9 +51,9 @@ class PageBuilder {
     );
   }
 
-  static Widget buildPluginScreen() {
+  static Widget buildPluginScreen({dynamic arguments}) {
     return BlocProvider(
-      create: (BuildContext context) => PluginBloc()..add(PluginIntialEvent()),
+      create: (BuildContext context) => PluginBloc()..add(PluginIntialEvent(arguments: arguments)),
       child: const PluginScreen(),
     );
   }

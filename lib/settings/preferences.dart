@@ -1,40 +1,28 @@
-import 'dart:convert';
+
 
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'app_themes.dart';
 
 class Preferences {
-  //
   static SharedPreferences? preferences;
-  static const String KEY_SELECTED_THEME = 'key_selected_theme';
+  static const String loginStatus = 'loginStatus';
 
   static init() async {
     preferences = await SharedPreferences.getInstance();
   }
 
-  static void saveTheme(AppTheme selectedTheme) async {
-    if (null == selectedTheme) {
-      selectedTheme = AppTheme.lightTheme;
+  static setLoginStatus(String? value) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    if (value is String) {
+      await prefs.setString(loginStatus, value);
     }
-    String theme = jsonEncode(selectedTheme.toString());
-    preferences?.setString(KEY_SELECTED_THEME, theme);
   }
 
-  static AppTheme? getTheme() {
-    String? theme = preferences?.getString(KEY_SELECTED_THEME);
-    if (null == theme) {
-      return AppTheme.lightTheme;
-    }
-    return getThemeFromString(jsonDecode(theme));
+  static Future<String> getLoginStatus() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? userUUid = prefs.getString(loginStatus);
+    return userUUid ?? '';
   }
 
-  static AppTheme? getThemeFromString(String themeString) {
-    for (AppTheme theme in AppTheme.values) {
-      if (theme.toString() == themeString) {
-        return theme;
-      }
-    }
-    return null;
-  }
+
 }

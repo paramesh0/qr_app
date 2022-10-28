@@ -1,9 +1,14 @@
+import 'dart:typed_data';
+import 'dart:ui';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:task_project/base/base.dart';
 import 'package:task_project/bloc/plugin_screen/plugin_bloc.dart';
+import 'package:task_project/model/albums_list.dart';
 import 'package:task_project/router.dart';
 import 'package:task_project/settings/color_resource.dart';
 import 'package:task_project/widgets/widget_utils.dart';
@@ -21,7 +26,12 @@ class _PluginScreenState extends State<PluginScreen> {
   TextEditingController phoneNumberController = TextEditingController();
   TextEditingController otpNumberController = TextEditingController();
   String? randomNUmber;
+  String? ipValues;
+
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  Uint8List? imageInUnit8ListValue;
+  final CollectionReference collectionReference =
+      FirebaseFirestore.instance.collection('users');
 
   @override
   void initState() {
@@ -37,14 +47,20 @@ class _PluginScreenState extends State<PluginScreen> {
       listener: (BuildContext context, BaseState state) async {
         if (state is SuccessState) {
           if (state.successResponse is String) {
-            setState(() {});
+            toQrImageData(randomNUmber!);
+          }
+          if (state.successResponse is IPValues) {
+            final IPValues iPResponse = state.successResponse;
+            ipValues = iPResponse.ip;
           }
         }
       },
       child: BlocBuilder(
         bloc: bloc,
         builder: (BuildContext context, BaseState state) {
-          if (state is LoadingState) {}
+          if (state is LoadingState) {
+            return loadingWidget();
+          }
           return SafeArea(
             child: Scaffold(
               backgroundColor: ColorResource.color000000,
@@ -138,25 +154,6 @@ class _PluginScreenState extends State<PluginScreen> {
                               ],
                             ),
                           ),
-                          Padding(
-                            padding: const EdgeInsets.only(
-                                left: 25, right: 25, top: 20),
-                            child: Container(
-                              width: double.infinity,
-                              height: MediaQuery.of(context).size.height / 15,
-                              decoration: BoxDecoration(
-                                  border: Border.all(
-                                      color: ColorResource.colorFFFFFF)),
-                              child: const Align(
-                                alignment: Alignment.center,
-                                child: Text('Today last Login 19:48',
-                                    style: TextStyle(
-                                        color: ColorResource.colorFFFFFF,
-                                        fontSize: 25,
-                                        fontFamily: 'Roboto-Regular')),
-                              ),
-                            ),
-                          )
                         ],
                       ),
                     ),
@@ -179,6 +176,13 @@ class _PluginScreenState extends State<PluginScreen> {
                           fontSize: 25,
                           fontFamily: 'Roboto-Regular')),
                   onPressed: () async {
+                    await collectionReference.add({
+                      'IP': ipValues,
+                      'generateNUmber': randomNUmber,
+                      'date': bloc.date,
+                      'time': bloc.time
+                    });
+
                     await Navigator.pushNamed(context, AppRoutes.listScreen);
                   },
                 ),
@@ -196,8 +200,43 @@ class _PluginScreenState extends State<PluginScreen> {
     randomNUmber = code.toString();
   }
 
+  loadingWidget() {
+    return const Center(
+      child: CircularProgressIndicator(
+        backgroundColor: ColorResource.color121212,
+        valueColor: AlwaysStoppedAnimation(Colors.white),
+        strokeWidth: 5,
+      ),
+    );
+  }
+
   signOut() {
     _auth.signOut().then((value) async =>
         await Navigator.pushNamed(context, AppRoutes.landingScreen));
   }
+
+  Future<Uint8List> toQrImageData(String text) async {
+    try {
+      final image = await QrPainter(
+        data: text,
+        version: QrVersions.auto,
+        gapless: false,
+        color: ColorResource.color000000,
+        emptyColor: ColorResource.colorFFFFFF,
+      ).toImage(300);
+      final a = await image.toByteData(format: ImageByteFormat.png);
+      imageInUnit8ListValue = a!.buffer.asUint8List();
+      return a.buffer.asUint8List();
+    } catch (e) {
+      throw e;
+    }
+  }
+
+/*getImageFile() async {
+    Uint8List? imageInUnit8List = imageInUnit8ListValue ;
+     var tempDir = await getTemporaryDirectory();
+    File file = tempDir.path as File;
+    file.writeAsBytesSync(imageInUnit8List);
+  }*/
+
 }

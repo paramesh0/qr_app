@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import 'package:task_project/settings/color_resource.dart';
 
 class Widgets {
@@ -55,30 +56,30 @@ class Widgets {
                             ),
                           )
                         : GestureDetector(
-                      onTap: () => logoutFunction,
-                      child: Stack(
-                        children: <Widget>[
-                          Container(
-                              height:
-                              MediaQuery.of(context).size.height / 11,
-                              width:
-                              MediaQuery.of(context).size.width / 4,
-                              decoration: const BoxDecoration(
-                                  color: Colors.transparent)),
-                          const Positioned(
-                              right: -1,
-                              top: -1,
-                              child: MyArc(diameter: 150)),
-                          // const Positioned(
-                          //     right: 15,
-                          //     top: 20,
-                          //     child: Text('Logout',
-                          //         style: TextStyle(
-                          //             fontFamily: 'Roboto-Regular',
-                          //             color: ColorResource.colorFFFFFF)))
-                        ],
-                      ),
-                    )
+                            onTap: () => logoutFunction,
+                            child: Stack(
+                              children: <Widget>[
+                                Container(
+                                    height:
+                                        MediaQuery.of(context).size.height / 11,
+                                    width:
+                                        MediaQuery.of(context).size.width / 4,
+                                    decoration: const BoxDecoration(
+                                        color: Colors.transparent)),
+                                const Positioned(
+                                    right: -1,
+                                    top: -1,
+                                    child: MyArc(diameter: 150)),
+                                // const Positioned(
+                                //     right: 15,
+                                //     top: 20,
+                                //     child: Text('Logout',
+                                //         style: TextStyle(
+                                //             fontFamily: 'Roboto-Regular',
+                                //             color: ColorResource.colorFFFFFF)))
+                              ],
+                            ),
+                          )
                   ],
                 ),
               ),
@@ -163,6 +164,44 @@ Widget customButton(
   );
 }
 
+cardView(BuildContext context, String? value1, String? value2, String? value3) {
+  return Card(
+      color: ColorResource.color121212,
+      elevation: 10,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
+      child: Padding(
+        padding: const EdgeInsets.all(15.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Wrap(
+              direction: Axis.vertical,
+              children: [
+                Text(value1!,
+                    style: const TextStyle(
+                        color: ColorResource.colorFFFFFF,
+                        fontSize: 15,
+                        fontFamily: 'Roboto-Regular')),
+                Text('IP  ${value2!}',
+                    style: const TextStyle(
+                        color: ColorResource.colorFFFFFF,
+                        fontSize: 15,
+                        fontFamily: 'Roboto-Regular'))
+              ],
+            ),
+            Container(
+                height: MediaQuery.of(context).size.height / 7,
+                width: MediaQuery.of(context).size.width / 4.3,
+                decoration: const BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                    color: ColorResource.colorFFFFFF),
+                child: QrImage(
+                    data: value3!, version: QrVersions.auto, size: 200.0))
+          ],
+        ),
+      ));
+}
+
 class MyArc extends StatelessWidget {
   final double diameter;
 
@@ -184,7 +223,3 @@ class MyPainter extends CustomPainter {
   @override
   bool shouldRepaint(CustomPainter oldDelegate) => false;
 }
-
-
-
-

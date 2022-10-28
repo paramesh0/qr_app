@@ -9,3 +9,10 @@ class PluginIntialEvent extends PluginEvent {
 
   PluginIntialEvent({this.context, this.arguments});
 }
+
+class PublicAPI extends PluginEvent {
+  BuildContext? context;
+  dynamic arguments;
+
+  PublicAPI({this.context, this.arguments});
+}

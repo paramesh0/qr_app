@@ -1,21 +1,20 @@
 import 'package:http/http.dart' as http;
-import 'package:http/http.dart';
-import 'package:task_project/model/albums_list.dart';
 
-abstract class AlbumsRepo {
-  Future<List<Album>> getAlbumList();
-}
+class APIRepository {
 
-class AlbumServices implements AlbumsRepo {
-  //
-  static const _baseUrl = 'jsonplaceholder.typicode.com';
-  static const String _GET_ALBUMS = '/albums';
+  static const String publicAPI = 'https://api.ipify.org?format=json';
 
-  @override
-  Future<List<Album>> getAlbumList() async {
-    Uri uri = Uri.https(_baseUrl, _GET_ALBUMS);
-    Response response = await http.get(uri);
-    List<Album> albums = albumFromJson(response.body);
-    return albums;
+  Future<dynamic> getPublicIP(arguments) async {
+    dynamic returnableValues;
+    Uri uri = Uri.parse(publicAPI);
+    var response = await http.get(uri);
+    if (response.statusCode == 200) {
+      returnableValues= response.body;
+
+      return  returnableValues;
+    } else {
+      returnableValues= response.body;
+      return  returnableValues;
+    }
   }
 }

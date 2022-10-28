@@ -1,11 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 import 'package:task_project/base/base.dart';
 import 'package:task_project/bloc/login/login_bloc.dart';
 import 'package:task_project/router.dart';
 
 import 'package:task_project/settings/color_resource.dart';
+import 'package:task_project/settings/preferences.dart';
 import 'package:task_project/widgets/widget_utils.dart';
 
 class AlbumsScreen extends StatefulWidget {
@@ -20,7 +22,8 @@ class _AlbumsScreenState extends State<AlbumsScreen> {
   TextEditingController phoneNumberController = TextEditingController();
   TextEditingController otpNumberController = TextEditingController();
   dynamic firebaseVerificationId;
-  final FirebaseAuth auth=FirebaseAuth.instance;
+  final FirebaseAuth auth = FirebaseAuth.instance;
+  DateTime now = DateTime.now();
 
   @override
   void initState() {
@@ -98,16 +101,17 @@ class _AlbumsScreenState extends State<AlbumsScreen> {
                                           );
                                           ScaffoldMessenger.of(context).showSnackBar(snackBar);
                                         }*/
-                                        phoneNumberVerification(phoneNumberController.text);
-
-
+                                        phoneNumberVerification(
+                                            phoneNumberController.text);
                                       },
                                       style: const TextStyle(
                                           color: ColorResource.colorFFFFFF),
-                                     validator: (value) => validateMobile(value!),
+                                      validator: (value) =>
+                                          validateMobile(value!),
                                       decoration: InputDecoration(
-                                          errorStyle:
-                                              const TextStyle(fontSize: 11.0,color: ColorResource.colorFFFFFF),
+                                          errorStyle: const TextStyle(
+                                              fontSize: 11.0,
+                                              color: ColorResource.colorFFFFFF),
                                           isDense: true,
                                           fillColor: ColorResource.color2E3B5F,
                                           filled: true,
@@ -174,22 +178,32 @@ class _AlbumsScreenState extends State<AlbumsScreen> {
                                               fontSize: 25,
                                               fontFamily: 'Roboto-Regular')),
                                       onPressed: () async {
-                                      /*try{
-                                        PhoneAuthCredential credential = PhoneAuthProvider.credential(verificationId: firebaseVerificationId, smsCode: otpNumberController.text);
-                                        await auth.signInWithCredential(credential);
+                                        try {
+                                          PhoneAuthCredential credential =
+                                              PhoneAuthProvider.credential(
+                                                  verificationId:
+                                                      firebaseVerificationId,
+                                                  smsCode:
+                                                      otpNumberController.text);
+                                          await auth
+                                              .signInWithCredential(credential);
 
-
-                                      }catch(e){
-                                        const snackBar = SnackBar(
-                                          backgroundColor:ColorResource.color2E3B5F ,
-                                          content: Text('Please enter valid OTP' ,style: TextStyle(
-                                              color: ColorResource.colorFFFFFF)),
-                                        );
-                                        ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                                      }*/
-                                       await Navigator.pushNamed(context, AppRoutes.pluginScreen);
-
-
+                                          var formatter =  DateFormat('yyyy-MM-dd');
+                                        String  formattedDate = formatter.format(now);
+                                          var formatterTime = DateFormat('hh:mm a');
+                                          String actualTime = formatterTime.format(now);
+                                          Map data={
+                                            'Date':formattedDate,
+                                            'Time':actualTime
+                                          };
+                                          await Navigator.pushNamed(
+                                              context, AppRoutes.pluginScreen,arguments:data );
+                                          Preferences.setLoginStatus(
+                                              'LoginSuccess');
+                                        } catch (e) {
+                                          displaySnackBar(
+                                              'Please enter valid OTP');
+                                        }
                                       },
                                     ),
                                   ),
@@ -208,13 +222,20 @@ class _AlbumsScreenState extends State<AlbumsScreen> {
     );
   }
 
+  displaySnackBar(String? values) {
+    return ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      backgroundColor: ColorResource.color2E3B5F,
+      content: Text(values!,
+          style: const TextStyle(color: ColorResource.colorFFFFFF)),
+    ));
+  }
+
   String? validateMobile(String value) {
     String pattern = r'(^(?:[+0]9)?[0-9]{10,12}$)';
-    RegExp regExp =  RegExp(pattern);
+    RegExp regExp = RegExp(pattern);
     if (value.isEmpty) {
       return 'Please enter mobile number';
-    }
-    else if (!regExp.hasMatch(value)) {
+    } else if (!regExp.hasMatch(value)) {
       return 'Please enter valid mobile number';
     }
     return null;
@@ -223,22 +244,17 @@ class _AlbumsScreenState extends State<AlbumsScreen> {
   phoneNumberVerification(String? values) async {
     return await FirebaseAuth.instance.verifyPhoneNumber(
       phoneNumber: '+91${values!}',
-      timeout: const Duration(seconds: 120),
+      timeout: const Duration(seconds: 60),
       verificationCompleted: (PhoneAuthCredential credential) async {
         // final res = await auth.signInWithCredential(credential);
       },
       verificationFailed: (authException) {
-        print('Auth Exception is ${authException.message}');
+        displaySnackBar(authException.message!);
       },
       codeSent: (String verificationId, int? resendToken) {
-        firebaseVerificationId=verificationId;
+        firebaseVerificationId = verificationId;
       },
-      codeAutoRetrievalTimeout: (String verificationId) {
-
-      },
+      codeAutoRetrievalTimeout: (String verificationId) {},
     );
   }
-
-
-
 }
